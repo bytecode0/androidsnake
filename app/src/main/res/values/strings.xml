@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">AndroidSnake</string>
+
+    <string name="snake_image">Snake Image</string>
+</resources>
