@@ -64,7 +64,7 @@ fun AndroidSnakeTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = SnakeTypography,
         content = content
     )
 }
