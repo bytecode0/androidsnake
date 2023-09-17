@@ -3,42 +3,123 @@ package com.mobileinsights.androidsnake
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.mobileinsights.androidsnake.ui.theme.AndroidSnakeTheme
+import com.mobileinsights.androidsnake.ui.theme.quirkyRobotFontFamily
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            AndroidSnakeTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    GradientBackground()
-                    GoldenSnake()
-                }
-            }
+            MainScreen()
         }
     }
 }
+
+@Composable
+fun MainScreen() {
+    AndroidSnakeTheme {
+        // A surface container using the 'background' color from the theme
+        Surface(
+            modifier = Modifier
+                .fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            GradientBackground()
+            Column(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(8.dp),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                var isSnakeAnimationFinished by remember { mutableStateOf(false) }
+
+                GoldenSnakeAnimated {
+                    isSnakeAnimationFinished = true
+                }
+
+                AnimatedVisibility(visible = isSnakeAnimationFinished) {
+                    PlayButton()
+                }
+             }
+        }
+    }
+}
+
+@Composable
+fun PlayButton() {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+
+    val backgroundColor = if (isPressed) {
+        Brush.verticalGradient(
+            colors = listOf(Color(0xFF00FF00), Color(0xFF02A702)),
+            startY = 0.0f,
+            endY = 100.0f
+        )
+    } else {
+        Brush.verticalGradient(
+            colors = listOf(Color(0xFF039703), Color(0xFF036603)),
+            startY = 0.0f,
+            endY = 100.0f
+        )
+    }
+
+    Button(
+        onClick = { /* Handle button click here */ },
+        interactionSource = interactionSource,
+        shape = CircleShape,
+        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+        modifier = Modifier
+            .padding(16.dp)
+            .background(backgroundColor, shape = CircleShape)
+    ) {
+
+        Text(
+            text = "START",
+            fontSize = 20.sp,
+            fontFamily = quirkyRobotFontFamily, // Apply the custom font here
+            color = Color.White
+        )
+    }
+}
+
 
 @Composable
 fun GradientBackground() {
@@ -59,20 +140,31 @@ fun GradientBackground() {
 }
 
 @Composable
-fun Background(modifier: Modifier = Modifier) {
-    Image(
-        painter = painterResource(id = R.drawable.galaxy01) ,
-        contentDescription = stringResource(id = R.string.snake_image),
-        contentScale = ContentScale.Crop
-    )
-}
+fun GoldenSnakeAnimated(onAnimationFinished: () -> Unit) {
+    var isAnimating by remember { mutableStateOf(true) }
+    val targetPosition = 300.dp
+    val finalPosition = 0.dp
+    val positionAnimation by animateDpAsState(
+        targetValue = if (isAnimating) targetPosition else finalPosition,
+        animationSpec = tween(2000),
+        label = "")
 
-@Composable
-fun GoldenSnake(modifier: Modifier = Modifier) {
+    if (positionAnimation == targetPosition) {
+        isAnimating = false
+    }
+
+    if (positionAnimation == finalPosition) {
+        onAnimationFinished.invoke()
+    }
+
     Image(
         painter = painterResource(id = R.drawable.snake_image) ,
         contentDescription = stringResource(id = R.string.snake_image),
-        modifier = Modifier.padding(72.dp)
+        alignment = Alignment.TopCenter,
+        modifier = Modifier
+            .padding(start = 48.dp, end = 48.dp)
+            .offset(y = positionAnimation)
+            .animateContentSize()
     )
 }
 
@@ -80,6 +172,6 @@ fun GoldenSnake(modifier: Modifier = Modifier) {
 @Composable
 fun GreetingPreview() {
     AndroidSnakeTheme {
-        Background()
+        MainScreen()
     }
 }
