@@ -16,8 +16,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -75,7 +77,19 @@ fun MainScreen() {
                 }
 
                 AnimatedVisibility(visible = isSnakeAnimationFinished) {
-                    PlayButton()
+                    MenuButton(text = "START") {
+                        TODO("Implement navigation to game")
+                    }
+                }
+                AnimatedVisibility(visible = isSnakeAnimationFinished) {
+                    MenuButton(text = "HIGH SCORES") {
+                        TODO("Implement navigation to game")
+                    }
+                }
+                AnimatedVisibility(visible = isSnakeAnimationFinished) {
+                    MenuButton(text = "OPTIONS") {
+                        TODO("Implement navigation to game")
+                    }
                 }
              }
         }
@@ -83,36 +97,38 @@ fun MainScreen() {
 }
 
 @Composable
-fun PlayButton() {
+fun MenuButton(text: String, onClick: () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
     val backgroundColor = if (isPressed) {
         Brush.verticalGradient(
-            colors = listOf(Color(0xFF00FF00), Color(0xFF02A702)),
+            colors = listOf(Color(0xFFF7C376), Color(0xFFF8A832)),
             startY = 0.0f,
             endY = 100.0f
         )
     } else {
         Brush.verticalGradient(
-            colors = listOf(Color(0xFF039703), Color(0xFF036603)),
+            colors = listOf(Color(0xFFFF9800), Color(0xFFCE7C05)),
             startY = 0.0f,
             endY = 100.0f
         )
     }
 
     Button(
-        onClick = { /* Handle button click here */ },
+        onClick = { onClick() },
         interactionSource = interactionSource,
         shape = CircleShape,
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         modifier = Modifier
             .padding(16.dp)
+            .height(72.dp)
+            .width(148.dp)
             .background(backgroundColor, shape = CircleShape)
     ) {
 
         Text(
-            text = "START",
+            text = text,
             fontSize = 20.sp,
             fontFamily = quirkyRobotFontFamily, // Apply the custom font here
             color = Color.White
