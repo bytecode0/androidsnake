@@ -5,14 +5,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,9 +36,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -62,7 +66,7 @@ fun MainScreen() {
                 .fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            GradientBackground()
+            GalaxyBackground()
             Column(
                 modifier = Modifier
                     .fillMaxHeight()
@@ -98,6 +102,20 @@ fun MainScreen() {
 
 @Composable
 fun MenuButton(text: String, onClick: () -> Unit) {
+    var scale by remember { mutableStateOf(1f) }
+    // Define animation specifications
+    val infiniteRepeatable by rememberInfiniteTransition(label = "").animateFloat(
+        initialValue = 1f,
+        targetValue = 1.1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1000),
+            repeatMode = RepeatMode.Reverse
+        ), label = ""
+    )
+
+    // Apply the scale animation to the button
+    val modifier = Modifier.scale(scale * infiniteRepeatable)
+
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
@@ -120,11 +138,14 @@ fun MenuButton(text: String, onClick: () -> Unit) {
         interactionSource = interactionSource,
         shape = CircleShape,
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-        modifier = Modifier
-            .padding(16.dp)
-            .height(72.dp)
-            .width(148.dp)
-            .background(backgroundColor, shape = CircleShape)
+        modifier = modifier
+            .then(
+                Modifier
+                    .padding(16.dp)
+                    .height(72.dp)
+                    .width(148.dp)
+                    .background(backgroundColor, shape = CircleShape)
+            )
     ) {
 
         Text(
@@ -136,22 +157,12 @@ fun MenuButton(text: String, onClick: () -> Unit) {
     }
 }
 
-
 @Composable
-fun GradientBackground() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFFffcc00),
-                        Color(0xFFff9900)
-                    ), // Replace with your gradient colors
-                    start = Offset(0f, 0f), // Adjust the start and end points as needed
-                    end = Offset(0f, 400.dp.value) // Adjust the end point as needed
-                )
-            )
+fun GalaxyBackground() {
+    Image(
+        painter = painterResource(id = R.drawable.galaxy01),
+        contentDescription = null,
+        contentScale = ContentScale.Crop
     )
 }
 
